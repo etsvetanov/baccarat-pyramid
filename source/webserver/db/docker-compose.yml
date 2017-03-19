@@ -1,0 +1,18 @@
+version: '2'
+services:
+  db:
+    container_name: baccarat_database
+    image: postgres:9.6
+    environment:
+      POSTGRES_USER: baccarat
+      POSTGRES_PASSWORD: s3cr3t
+    networks:
+      baccarat_network:
+        ipv4_address: 172.25.0.2
+networks:
+  baccarat_network:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.25.0.0/24
+

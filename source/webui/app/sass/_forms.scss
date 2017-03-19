@@ -1,0 +1,45 @@
+//.inline-form tr td:first-child{
+//  text-align: right;
+//
+//  label {
+//    padding-right: 10px;
+//  }
+//}
+
+//input {
+//  background-color: $solarized-base02;
+//  color: $solarized-yellow;
+//  border:none;
+//  border-left: 2px solid $solarized-yellow;
+//}
+//
+//input:focus {
+//  color: $solarized-yellow;
+//  outline: none;
+//  border-left: 2px solid $solarized-orange;
+//}
+
+
+
+input.fancy-input {
+  //color: red;
+  display: block;
+  padding: 5px;
+
+
+  height: $input-height;
+  width: $input-width;
+}
+
+.option-container {
+  display: flex;
+  align-items: center;
+}
+
+.inline-label {
+  display: inline-block;
+  width: 180px;
+  text-align: right;
+  margin: 15px 20px;
+}
+

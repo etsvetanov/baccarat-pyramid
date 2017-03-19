@@ -1,0 +1,16 @@
+$button-padding: 10px;
+$button-border-color: #b58900;
+
+
+.button {
+  padding: $button-padding;
+  border: 2px solid $button-border-color;
+  display: inline-block;
+  margin: 10px 0;
+  border-radius: 3px;
+}
+
+.button:hover {
+  background-color: $button-border-color;
+  color: $solarized-bg;
+}

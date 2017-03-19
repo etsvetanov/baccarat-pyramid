@@ -1,0 +1,26 @@
+@import "variables";
+@import "buttons";
+@import "forms";
+@import "switch";
+@import "slider";
+@import "_navbar";
+@import "_spinners";
+
+body {
+  background-color: $solarized-bg;
+  color: $solarized-base0;
+}
+
+.main {
+  display: flex;
+  justify-content: center;
+}
+
+
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px $solarized-bg inset;
+  color: red;
+}
+
+

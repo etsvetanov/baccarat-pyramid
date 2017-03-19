@@ -1,0 +1,24 @@
+{% extends "layout.jinja2" %}
+
+{% block title %}
+    <p> Login </p>
+{% endblock %}
+
+
+
+{% block content %}
+    <form action=""{{  url }} method="post">
+        <input type="hidden" name="next" value="{{ next_url }}"/>
+        <div>
+            <label for="login">Username</label>
+            <input name="login" id="login" type="text" value="{{ login }}" />
+        </div>
+        <div>
+            <label for="password">Password</label>
+            <input name="password" id="password" type="password" />
+        </div>
+        <div>
+            <button type="submit" name="form.submitted" value="Log In">Log In</button>
+        </div>
+    </form>
+{% endblock content %}

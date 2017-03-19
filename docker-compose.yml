@@ -1,0 +1,20 @@
+version: '2'
+services:
+  web:
+    container_name: baccarat_web
+    build: ./source
+    ports:
+      - "6543:6543"
+    volumes:
+      - ./source:/project/source
+    tty: true
+    depends_on:
+      - db
+  db:
+    container_name: baccarat_db
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: s3cr3t
+      POSTGRES_USER: baccarat
+
+

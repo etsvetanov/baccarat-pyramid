@@ -1,0 +1,3 @@
+FROM postgres:9.6
+ENV POSTGRES_USER: baccarat
+ENV POSTGRES_PASSWORD: s3cr3t
