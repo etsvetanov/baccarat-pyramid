@@ -1,6 +1,11 @@
-import { SET_OPTION, TOGGLE_OPTION } from 'actions/actionTypes.jsx';
+import {
+    SET_OPTION,
+    TOGGLE_OPTION,
+    REQUEST_OPTIONS,
+    RECEIVE_OPTIONS,
+} from 'actions/actionTypes.jsx';
 
-const initialState = [
+const initialOptions = [
     {
         name: "Starting bet",
         id: "starting_bet",
@@ -90,20 +95,49 @@ function userOption(state={}, action) {
                 return state
             }
             return Object.assign({}, state, {value: !state.value});
+        case RECEIVE_OPTIONS:
+            const {options} = action.payload;
+
+            if (options.hasOwnProperty(state.id)) {
+                return {
+                    ...state,
+                    value: options[state.id],
+                };
+            }
+
+            return state;
 
         default:
             return state;
     }
 }
 
-function userOptions(state=initialState, action) {
+function optionsLoading(state=true, action) {
+    switch(action.type) {
+        case REQUEST_OPTIONS:
+            return true;
+        case RECEIVE_OPTIONS:
+            return false;
+        default:
+            return state;
+    }
+}
+
+function optionsList(state=initialOptions, action) {
     switch(action.type) {
         case SET_OPTION:
-            return state.map(opt => userOption(opt, action));
         case TOGGLE_OPTION:
+        case RECEIVE_OPTIONS:
             return state.map(opt => userOption(opt, action));
         default:
             return state;
+    }
+}
+
+function userOptions(state={}, action) {
+    return {
+        optionsLoading: optionsLoading(state.optionsLoading, action),
+        optionsList: optionsList(state.optionsList, action),
     }
 }
 

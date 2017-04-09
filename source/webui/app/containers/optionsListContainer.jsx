@@ -1,9 +1,9 @@
-import { connect } from 'react-redux';
-import React, { Component, PropTypes } from 'react';
+import {connect} from 'react-redux';
+import React, {Component, PropTypes} from 'react';
 
 import OptionsList from 'components/optionsList.jsx';
 import Spinner from 'components/spinner.jsx';
-import { setOption, toggleOption } from 'actions/index.jsx';
+import {setOption, toggleOption, requestOptions, receiveOptions} from 'actions/index.jsx';
 
 class OptionsListContainer extends Component {
     componentDidMount() {
@@ -12,30 +12,44 @@ class OptionsListContainer extends Component {
 
     fetchData() {
         console.log('will fetch data...');
-        const { requestOptions } = this.props;
+        const {requestOptions, receiveOptions} = this.props;
+
+        requestOptions();
+
         fetch('/api/user_options', {credentials: 'include'})
-            .then(function(response) {
-                console.log('DA RESPONSE', response);
+            .then(function (response) {
+                return response.json()
+            })
+            .then(function (options) {
+                receiveOptions(options);
             });
     }
 
     render() {
         if (this.props.isLoading) {
+            console.log('Spin right round...');
             return <Spinner />
         }
 
         return (
-            <OptionsList
-                options={this.props.options}
-            />
+            <div>
+                <OptionsList
+                    options={this.props.options}
+                    setOption={this.props.setOption}
+                />
+
+                <div className="button" onClick={this.handleSaveOptions}>
+                    Create
+                </div>
+            </div>
         )
     }
 }
 
 const mapStateToProps = (state) => {
     return {
-        options: state.userOptions
-    }
+        options: state.userOptions.optionsList,
+    };
 };
 
 const mapDispatchToProps = (dispatch) => {
@@ -52,6 +66,10 @@ const mapDispatchToProps = (dispatch) => {
         requestOptions: () => {
             dispatch(requestOptions());
         },
+
+        receiveOptions: (options) => {
+            dispatch(receiveOptions(options));
+        }
     }
 };
 

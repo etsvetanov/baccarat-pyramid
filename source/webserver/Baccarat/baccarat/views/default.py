@@ -36,6 +36,7 @@ def set_user_options(request):
         .update({column: received_options[column] for column in Options.__table__.columns.keys() if column in received_options})
 
 
+
 @view_config(route_name='create_user')
 def create_user(request):
     username = request.params['username']

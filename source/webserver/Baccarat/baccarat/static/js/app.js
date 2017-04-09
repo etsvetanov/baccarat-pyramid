@@ -152,6 +152,10 @@ webpackJsonp([0],{
 	var SET_OPTION = exports.SET_OPTION = 'SET_OPTION';
 	var TOGGLE_OPTION = exports.TOGGLE_OPTION = 'TOGGLE_OPTION';
 	var FETCH_OPTIONS = exports.FETCH_OPTIONS = 'FETCH_OPTIONS';
+	var REQUEST_OPTIONS = exports.REQUEST_OPTIONS = 'REQUEST_OPTIONS';
+	var RECEIVE_OPTIONS = exports.RECEIVE_OPTIONS = 'RECEIVE_OPTIONS';
+	var SAVE_OPTIONS_REQUEST = exports.SAVE_OPTIONS_REQUEST = 'SAVE_OPTIONS_REQUEST';
+	var SAVE_OPTIONS_SUCCESS = exports.SAVE_OPTIONS_SUCCESS = 'SAVE_OPTIONS_SUCCESS';
 
 /***/ },
 
@@ -164,9 +168,11 @@ webpackJsonp([0],{
 	    value: true
 	});
 	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
 	var _actionTypes = __webpack_require__(201);
 	
-	var initialState = [{
+	var initialOptions = [{
 	    name: "Starting bet",
 	    id: "starting_bet",
 	    value: 1,
@@ -245,28 +251,61 @@ webpackJsonp([0],{
 	                return state;
 	            }
 	            return Object.assign({}, state, { value: !state.value });
+	        case _actionTypes.RECEIVE_OPTIONS:
+	            var options = action.payload.options;
+	
+	
+	            if (options.hasOwnProperty(state.id)) {
+	                return _extends({}, state, {
+	                    value: options[state.id]
+	                });
+	            }
+	
+	            return state;
 	
 	        default:
 	            return state;
 	    }
 	}
 	
-	function userOptions() {
-	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+	function optionsLoading() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+	    var action = arguments[1];
+	
+	    switch (action.type) {
+	        case _actionTypes.REQUEST_OPTIONS:
+	            return true;
+	        case _actionTypes.RECEIVE_OPTIONS:
+	            return false;
+	        default:
+	            return state;
+	    }
+	}
+	
+	function optionsList() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialOptions;
 	    var action = arguments[1];
 	
 	    switch (action.type) {
 	        case _actionTypes.SET_OPTION:
-	            return state.map(function (opt) {
-	                return userOption(opt, action);
-	            });
 	        case _actionTypes.TOGGLE_OPTION:
+	        case _actionTypes.RECEIVE_OPTIONS:
 	            return state.map(function (opt) {
 	                return userOption(opt, action);
 	            });
 	        default:
 	            return state;
 	    }
+	}
+	
+	function userOptions() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	    var action = arguments[1];
+	
+	    return {
+	        optionsLoading: optionsLoading(state.optionsLoading, action),
+	        optionsList: optionsList(state.optionsList, action)
+	    };
 	}
 	
 	exports.default = userOptions;
@@ -729,11 +768,11 @@ webpackJsonp([0],{
 	
 	var _optionsList2 = _interopRequireDefault(_optionsList);
 	
-	var _spinner = __webpack_require__(284);
+	var _spinner = __webpack_require__(282);
 	
 	var _spinner2 = _interopRequireDefault(_spinner);
 	
-	var _index = __webpack_require__(282);
+	var _index = __webpack_require__(283);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -761,22 +800,40 @@ webpackJsonp([0],{
 	        key: 'fetchData',
 	        value: function fetchData() {
 	            console.log('will fetch data...');
-	            var requestOptions = this.props.requestOptions;
+	            var _props = this.props,
+	                requestOptions = _props.requestOptions,
+	                receiveOptions = _props.receiveOptions;
+	
+	
+	            requestOptions();
 	
 	            fetch('/api/user_options', { credentials: 'include' }).then(function (response) {
-	                console.log('DA RESPONSE', response);
+	                return response.json();
+	            }).then(function (options) {
+	                receiveOptions(options);
 	            });
 	        }
 	    }, {
 	        key: 'render',
 	        value: function render() {
 	            if (this.props.isLoading) {
+	                console.log('Spin right round...');
 	                return _react2.default.createElement(_spinner2.default, null);
 	            }
 	
-	            return _react2.default.createElement(_optionsList2.default, {
-	                options: this.props.options
-	            });
+	            return _react2.default.createElement(
+	                'div',
+	                null,
+	                _react2.default.createElement(_optionsList2.default, {
+	                    options: this.props.options,
+	                    setOption: this.props.setOption
+	                }),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'button', onClick: this.handleSaveOptions },
+	                    'Create'
+	                )
+	            );
 	        }
 	    }]);
 	
@@ -785,7 +842,7 @@ webpackJsonp([0],{
 	
 	var mapStateToProps = function mapStateToProps(state) {
 	    return {
-	        options: state.userOptions
+	        options: state.userOptions.optionsList
 	    };
 	};
 	
@@ -800,19 +857,13 @@ webpackJsonp([0],{
 	            dispatch((0, _index.setOption)(name, value));
 	        },
 	
-	        requestOptions: function (_requestOptions) {
-	            function requestOptions() {
-	                return _requestOptions.apply(this, arguments);
-	            }
+	        requestOptions: function requestOptions() {
+	            dispatch((0, _index.requestOptions)());
+	        },
 	
-	            requestOptions.toString = function () {
-	                return _requestOptions.toString();
-	            };
-	
-	            return requestOptions;
-	        }(function () {
-	            dispatch(requestOptions());
-	        })
+	        receiveOptions: function receiveOptions(options) {
+	            dispatch((0, _index.receiveOptions)(options));
+	        }
 	    };
 	};
 	
@@ -847,7 +898,7 @@ webpackJsonp([0],{
 	
 	var _slider2 = _interopRequireDefault(_slider);
 	
-	var _spinner = __webpack_require__(284);
+	var _spinner = __webpack_require__(282);
 	
 	var _spinner2 = _interopRequireDefault(_spinner);
 	
@@ -1127,51 +1178,6 @@ webpackJsonp([0],{
 /***/ 282:
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.toggleOption = exports.setOption = exports.selectMenu = undefined;
-	
-	var _actionTypes = __webpack_require__(201);
-	
-	// ACTION CREATORS:
-	
-	
-	var selectMenu = exports.selectMenu = function selectMenu(menuText) {
-	    return {
-	        type: _actionTypes.SELECT_MENU,
-	        payload: {
-	            menuText: menuText
-	        }
-	    };
-	};
-	
-	var setOption = exports.setOption = function setOption(name, value) {
-	    return {
-	        type: _actionTypes.SET_OPTION,
-	        payload: {
-	            name: name,
-	            value: value
-	        }
-	    };
-	};
-	
-	var toggleOption = exports.toggleOption = function toggleOption(name) {
-	    return {
-	        type: _actionTypes.TOGGLE_OPTION,
-	        payload: {
-	            name: name
-	        }
-	    };
-	};
-
-/***/ },
-
-/***/ 284:
-/***/ function(module, exports, __webpack_require__) {
-
 	"use strict";
 	
 	Object.defineProperty(exports, "__esModule", {
@@ -1193,6 +1199,92 @@ webpackJsonp([0],{
 	};
 	
 	exports.default = Spinner;
+
+/***/ },
+
+/***/ 283:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.saveOptionsSuccess = exports.saveOptionsRequest = exports.receiveOptions = exports.requestOptions = exports.toggleOption = exports.setOption = exports.selectMenu = undefined;
+	
+	var _actionTypes = __webpack_require__(201);
+	
+	var actionType = _interopRequireWildcard(_actionTypes);
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	
+	// ACTION CREATORS:
+	
+	
+	var selectMenu = exports.selectMenu = function selectMenu(menuText) {
+	    return {
+	        type: actionType.SELECT_MENU,
+	        payload: {
+	            menuText: menuText
+	        }
+	    };
+	};
+	
+	var setOption = exports.setOption = function setOption(name, value) {
+	    return {
+	        type: actionType.SET_OPTION,
+	        payload: {
+	            name: name,
+	            value: value
+	        }
+	    };
+	};
+	
+	var toggleOption = exports.toggleOption = function toggleOption(name) {
+	    return {
+	        type: actionType.TOGGLE_OPTION,
+	        payload: {
+	            name: name
+	        }
+	    };
+	};
+	
+	var requestOptions = exports.requestOptions = function requestOptions() {
+	    return {
+	        type: actionType.REQUEST_OPTIONS
+	    };
+	};
+	
+	var receiveOptions = exports.receiveOptions = function receiveOptions(options) {
+	    return {
+	        type: actionType.RECEIVE_OPTIONS,
+	        payload: {
+	            options: options
+	        }
+	    };
+	};
+	
+	var saveOptionsRequest = exports.saveOptionsRequest = function saveOptionsRequest() {
+	    return {
+	        type: actionType.SAVE_OPTIONS_REQUEST
+	    };
+	};
+	
+	var saveOptionsSuccess = exports.saveOptionsSuccess = function saveOptionsSuccess() {
+	    return {
+	        type: actionType.SAVE_OPTIONS_REQUEST
+	    };
+	};
+	
+	// export const saveOptions = (options) => (dispatch) =>
+	//         fetch('/api/set_options', {
+	//             credentials: 'include',
+	//             body: options,
+	//         }).then(response => {
+	//             dispatch({
+	//                 type: actionType.SAVE_OPTIONS_SUCCESS
+	//             });
+	//         });
 
 /***/ }
 
