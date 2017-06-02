@@ -19,6 +19,11 @@
 //  border-left: 2px solid $solarized-orange;
 //}
 
+.options-container {
+  display: flex;
+  flex-direction: column;
+}
+
 
 
 input.fancy-input {
@@ -41,5 +46,24 @@ input.fancy-input {
   width: 180px;
   text-align: right;
   margin: 15px 20px;
+}
+
+.iteration-input {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 90px;
+
+
+}
+
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.iteration-input-container {
+  display: flex;
+  align-items: center;
 }
 

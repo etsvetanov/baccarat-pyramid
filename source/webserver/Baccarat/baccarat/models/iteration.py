@@ -18,7 +18,7 @@ class Iteration(Base):
     user_id = Column(ForeignKey('users.id'), nullable=False)
     user = relationship('User', backref='Iterations')
 
-    iteration = Column(Integer, nullable=False, default=0)
+    number = Column(Integer, nullable=False, default=0)
     name = Column(String(length=10), nullable=True)
     bet = Column(BigInteger, nullable=True)
     index = Column(Integer, nullable=True)

@@ -20,7 +20,10 @@ requires = [
     'zope.sqlalchemy',
     'waitress',
     'psycopg2',
-    'alembic'
+    'alembic',
+    'celery',
+    'pytest',
+    'redis',
     ]
 
 tests_require = [

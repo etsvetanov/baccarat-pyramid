@@ -1,0 +1,45 @@
+version: '2'
+services:
+  web:
+    container_name: baccarat_web
+    build:
+     context: .
+     dockerfile: Dockerfile
+    ports:
+      - "6543:6543"
+    volumes:
+      - .:/project/source
+#    command: /project/source/run_web.sh
+    depends_on:
+      - db
+
+  db:
+    container_name: baccarat_db
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: s3cr3t
+      POSTGRES_USER: baccarat
+    ports:
+    - "65432:5432"
+
+  worker:
+    container_name: baccarat_worker
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: /project/env/bin/celery -A baccarat.tasks worker --loglevel=info
+    volumes:
+      - .:/project/source
+
+  redis:
+    container_name: baccarat_redis
+    image: redis:alpine
+
+
+
+
+
+
+
+
+

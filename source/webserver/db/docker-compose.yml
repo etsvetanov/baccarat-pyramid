@@ -9,6 +9,7 @@ services:
     networks:
       baccarat_network:
         ipv4_address: 172.25.0.2
+
 networks:
   baccarat_network:
     driver: bridge

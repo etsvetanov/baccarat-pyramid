@@ -54,16 +54,31 @@ export const saveOptionsRequest = () => {
 
 export const saveOptionsSuccess = () => {
     return {
-        type: actionType.SAVE_OPTIONS_REQUEST,
+        type: actionType.SAVE_OPTIONS_SUCCESS,
     }
 };
 
-// export const saveOptions = (options) => (dispatch) =>
-//         fetch('/api/set_options', {
-//             credentials: 'include',
-//             body: options,
-//         }).then(response => {
-//             dispatch({
-//                 type: actionType.SAVE_OPTIONS_SUCCESS
-//             });
-//         });
+export const startSimulation = () => {
+    return {
+        type: actionType.START_SIMULATION,
+    }
+};
+
+export const setProgress = (progress) => {
+    return {
+        type: actionType.SET_PROGRESS,
+        progress,
+    }
+};
+
+export const requestSimulation = () => {
+    return {
+        type: actionType.REQUEST_SIMULATION,
+    }
+};
+
+export const simulationFinished = () => {
+    return {
+        type: actionType.SIMULATION_FINISHED,
+    }
+};

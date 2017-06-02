@@ -19,7 +19,7 @@ webpackJsonp([0],{
 	
 	var _index2 = _interopRequireDefault(_index);
 	
-	var _app = __webpack_require__(203);
+	var _app = __webpack_require__(204);
 	
 	var _app2 = _interopRequireDefault(_app);
 	
@@ -47,8 +47,9 @@ webpackJsonp([0],{
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
+	exports.getUserOptions = undefined;
 	
 	var _menu = __webpack_require__(200);
 	
@@ -58,21 +59,27 @@ webpackJsonp([0],{
 	
 	var _optionsReducer2 = _interopRequireDefault(_optionsReducer);
 	
+	var _simulationReducer = __webpack_require__(203);
+	
+	var _simulationReducer2 = _interopRequireDefault(_simulationReducer);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	// import { combineReducers } from 'redux';
 	function rootReducer() {
-	  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-	  var action = arguments[1];
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	    var action = arguments[1];
 	
-	  // this is the shape of the state object
-	  return {
-	    menuItems: (0, _menu2.default)(state.menuItems, action),
-	    userOptions: (0, _optionsReducer2.default)(state.userOptions, action)
-	  };
-	}
-	
+	    // this is the shape of the state object
+	    return {
+	        menuItems: (0, _menu2.default)(state.menuItems, action),
+	        userOptions: (0, _optionsReducer2.default)(state.userOptions, action),
+	        simulation: (0, _simulationReducer2.default)(state.simulation, action)
+	    };
+	} // import { combineReducers } from 'redux';
 	exports.default = rootReducer;
+	var getUserOptions = exports.getUserOptions = function getUserOptions(state) {
+	    return (0, _optionsReducer.getByOption)(state.userOptions);
+	};
 	
 	/*
 	    * The reducer is a function that returns the new store state tree.
@@ -156,6 +163,10 @@ webpackJsonp([0],{
 	var RECEIVE_OPTIONS = exports.RECEIVE_OPTIONS = 'RECEIVE_OPTIONS';
 	var SAVE_OPTIONS_REQUEST = exports.SAVE_OPTIONS_REQUEST = 'SAVE_OPTIONS_REQUEST';
 	var SAVE_OPTIONS_SUCCESS = exports.SAVE_OPTIONS_SUCCESS = 'SAVE_OPTIONS_SUCCESS';
+	var START_SIMULATION = exports.START_SIMULATION = 'START_SIMULATION';
+	var SET_PROGRESS = exports.SET_PROGRESS = 'SET_PROGRESS';
+	var REQUEST_SIMULATION = exports.REQUEST_SIMULATION = 'REQUEST_SIMULATION';
+	var SIMULATION_FINISHED = exports.SIMULATION_FINISHED = 'SIMULATION_FINISHED';
 
 /***/ },
 
@@ -167,10 +178,15 @@ webpackJsonp([0],{
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.getByOption = undefined;
 	
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 	
 	var _actionTypes = __webpack_require__(201);
+	
+	var actionTypes = _interopRequireWildcard(_actionTypes);
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
 	var initialOptions = [{
 	    name: "Starting bet",
@@ -240,18 +256,18 @@ webpackJsonp([0],{
 	    var action = arguments[1];
 	
 	    switch (action.type) {
-	        case _actionTypes.SET_OPTION:
+	        case actionTypes.SET_OPTION:
 	            if (state.name !== action.payload.name) {
 	                return state;
 	            }
 	            return Object.assign({}, state, { value: action.payload.value });
 	
-	        case _actionTypes.TOGGLE_OPTION:
+	        case actionTypes.TOGGLE_OPTION:
 	            if (state.name !== action.payload.name) {
 	                return state;
 	            }
 	            return Object.assign({}, state, { value: !state.value });
-	        case _actionTypes.RECEIVE_OPTIONS:
+	        case actionTypes.RECEIVE_OPTIONS:
 	            var options = action.payload.options;
 	
 	
@@ -273,9 +289,9 @@ webpackJsonp([0],{
 	    var action = arguments[1];
 	
 	    switch (action.type) {
-	        case _actionTypes.REQUEST_OPTIONS:
+	        case actionTypes.REQUEST_OPTIONS:
 	            return true;
-	        case _actionTypes.RECEIVE_OPTIONS:
+	        case actionTypes.RECEIVE_OPTIONS:
 	            return false;
 	        default:
 	            return state;
@@ -287,12 +303,29 @@ webpackJsonp([0],{
 	    var action = arguments[1];
 	
 	    switch (action.type) {
-	        case _actionTypes.SET_OPTION:
-	        case _actionTypes.TOGGLE_OPTION:
-	        case _actionTypes.RECEIVE_OPTIONS:
+	        case actionTypes.SET_OPTION:
+	        case actionTypes.TOGGLE_OPTION:
+	        case actionTypes.RECEIVE_OPTIONS:
 	            return state.map(function (opt) {
 	                return userOption(opt, action);
 	            });
+	        default:
+	            return state;
+	    }
+	}
+	
+	function optionsSaved() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'saved';
+	    var action = arguments[1];
+	
+	    switch (action.type) {
+	        case actionTypes.SAVE_OPTIONS_REQUEST:
+	            return "saving";
+	        case actionTypes.SAVE_OPTIONS_SUCCESS:
+	            return "saved";
+	        case actionTypes.SET_OPTION:
+	        case actionTypes.TOGGLE_OPTION:
+	            return "dirty";
 	        default:
 	            return state;
 	    }
@@ -304,11 +337,21 @@ webpackJsonp([0],{
 	
 	    return {
 	        optionsLoading: optionsLoading(state.optionsLoading, action),
+	        optionsSaved: optionsSaved(state.optionsSaved, action),
 	        optionsList: optionsList(state.optionsList, action)
 	    };
 	}
 	
 	exports.default = userOptions;
+	var getByOption = exports.getByOption = function getByOption(state) {
+	    var user_options = {};
+	
+	    state.optionsList.forEach(function (option) {
+	        return user_options[option.id] = option.value;
+	    });
+	
+	    return user_options;
+	};
 
 /***/ },
 
@@ -321,29 +364,92 @@ webpackJsonp([0],{
 	    value: true
 	});
 	
+	var _actionTypes = __webpack_require__(201);
+	
+	var actionTypes = _interopRequireWildcard(_actionTypes);
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	
+	function simulationState() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'idle';
+	    var action = arguments[1];
+	
+	    switch (action.type) {
+	        case actionTypes.START_SIMULATION:
+	            return "running";
+	        case actionTypes.REQUEST_SIMULATION:
+	            return "requested";
+	        case actionTypes.SET_PROGRESS:
+	            if (action.progress === '100') {
+	                return "finished";
+	            } else {
+	                return state;
+	            }
+	        default:
+	            return state;
+	    }
+	}
+	
+	function simulationProgress() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '0';
+	    var action = arguments[1];
+	
+	    switch (action.type) {
+	        case actionTypes.SET_PROGRESS:
+	            return action.progress;
+	        default:
+	            return state;
+	    }
+	}
+	
+	function simulation() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	    var action = arguments[1];
+	
+	    return {
+	        simulationState: simulationState(state.simulationState, action),
+	        simulationProgress: simulationProgress(state.simulationProgress, action)
+	    };
+	}
+	
+	exports.default = simulation;
+
+/***/ },
+
+/***/ 204:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
 	var _react = __webpack_require__(1);
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _reactRouter = __webpack_require__(204);
+	var _reactRouter = __webpack_require__(205);
 	
-	var _reactRedux = __webpack_require__(259);
+	var _reactRedux = __webpack_require__(260);
 	
-	var _base = __webpack_require__(274);
+	var _base = __webpack_require__(275);
 	
 	var _base2 = _interopRequireDefault(_base);
 	
-	var _admin = __webpack_require__(276);
+	var _admin = __webpack_require__(277);
 	
 	var _admin2 = _interopRequireDefault(_admin);
 	
-	var _optionsPage = __webpack_require__(277);
+	var _optionsPage = __webpack_require__(278);
 	
 	var _optionsPage2 = _interopRequireDefault(_optionsPage);
 	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	var _simulationPage = __webpack_require__(929);
 	
-	// import SimulatePage from 'pages/simulatePage.jsx';
+	var _simulationPage2 = _interopRequireDefault(_simulationPage);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	/*
 	    The 'Provider' component makes the Redux available to the connect() calls in the component
@@ -363,7 +469,8 @@ webpackJsonp([0],{
 	                _reactRouter.Route,
 	                { path: '/', component: _base2.default },
 	                _react2.default.createElement(_reactRouter.Route, { path: 'admin', component: _admin2.default }),
-	                _react2.default.createElement(_reactRouter.Route, { path: 'options', component: _optionsPage2.default })
+	                _react2.default.createElement(_reactRouter.Route, { path: 'options', component: _optionsPage2.default }),
+	                _react2.default.createElement(_reactRouter.Route, { path: 'simulate', component: _simulationPage2.default })
 	            )
 	        )
 	    );
@@ -375,7 +482,7 @@ webpackJsonp([0],{
 
 /***/ },
 
-/***/ 274:
+/***/ 275:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -390,7 +497,7 @@ webpackJsonp([0],{
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _NavBar = __webpack_require__(275);
+	var _NavBar = __webpack_require__(276);
 	
 	var _NavBar2 = _interopRequireDefault(_NavBar);
 	
@@ -430,7 +537,7 @@ webpackJsonp([0],{
 
 /***/ },
 
-/***/ 275:
+/***/ 276:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -449,7 +556,7 @@ webpackJsonp([0],{
 	
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 	
-	var _reactRouter = __webpack_require__(204);
+	var _reactRouter = __webpack_require__(205);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -513,7 +620,7 @@ webpackJsonp([0],{
 
 /***/ },
 
-/***/ 276:
+/***/ 277:
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -691,7 +798,7 @@ webpackJsonp([0],{
 
 /***/ },
 
-/***/ 277:
+/***/ 278:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -706,7 +813,7 @@ webpackJsonp([0],{
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _optionsListContainer = __webpack_require__(278);
+	var _optionsListContainer = __webpack_require__(279);
 	
 	var _optionsListContainer2 = _interopRequireDefault(_optionsListContainer);
 	
@@ -717,8 +824,6 @@ webpackJsonp([0],{
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	// import Switch from '../components/Switch.jsx';
-	
 	
 	var OptionsPage = function (_React$Component) {
 	    _inherits(OptionsPage, _React$Component);
@@ -747,7 +852,7 @@ webpackJsonp([0],{
 
 /***/ },
 
-/***/ 278:
+/***/ 279:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -758,21 +863,29 @@ webpackJsonp([0],{
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _reactRedux = __webpack_require__(259);
+	var _reactRedux = __webpack_require__(260);
 	
 	var _react = __webpack_require__(1);
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _optionsList = __webpack_require__(279);
+	var _semanticUiReact = __webpack_require__(280);
+	
+	var _optionsList = __webpack_require__(924);
 	
 	var _optionsList2 = _interopRequireDefault(_optionsList);
 	
-	var _spinner = __webpack_require__(282);
+	var _spinner = __webpack_require__(927);
 	
 	var _spinner2 = _interopRequireDefault(_spinner);
 	
-	var _index = __webpack_require__(283);
+	var _index = __webpack_require__(928);
+	
+	var actions = _interopRequireWildcard(_index);
+	
+	var _index2 = __webpack_require__(199);
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -788,7 +901,10 @@ webpackJsonp([0],{
 	    function OptionsListContainer() {
 	        _classCallCheck(this, OptionsListContainer);
 	
-	        return _possibleConstructorReturn(this, (OptionsListContainer.__proto__ || Object.getPrototypeOf(OptionsListContainer)).apply(this, arguments));
+	        var _this = _possibleConstructorReturn(this, (OptionsListContainer.__proto__ || Object.getPrototypeOf(OptionsListContainer)).call(this));
+	
+	        _this.handleSaveOptions = _this.handleSaveOptions.bind(_this);
+	        return _this;
 	    }
 	
 	    _createClass(OptionsListContainer, [{
@@ -814,6 +930,28 @@ webpackJsonp([0],{
 	            });
 	        }
 	    }, {
+	        key: 'handleSaveOptions',
+	        value: function handleSaveOptions() {
+	            console.log('Saving options...');
+	
+	            var _props2 = this.props,
+	                saveOptionsRequest = _props2.saveOptionsRequest,
+	                saveOptionsSuccess = _props2.saveOptionsSuccess;
+	
+	
+	            saveOptionsRequest();
+	
+	            fetch('/api/user_options', {
+	                method: 'POST',
+	                credentials: 'include',
+	                body: JSON.stringify(this.props.optionsHash)
+	            }).then(function (response) {
+	                if (response.ok) {
+	                    saveOptionsSuccess();
+	                }
+	            });
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
 	            if (this.props.isLoading) {
@@ -823,16 +961,18 @@ webpackJsonp([0],{
 	
 	            return _react2.default.createElement(
 	                'div',
-	                null,
+	                { className: 'options-container' },
 	                _react2.default.createElement(_optionsList2.default, {
 	                    options: this.props.options,
 	                    setOption: this.props.setOption
 	                }),
-	                _react2.default.createElement(
-	                    'div',
-	                    { className: 'button', onClick: this.handleSaveOptions },
-	                    'Create'
-	                )
+	                _react2.default.createElement(_semanticUiReact.Button, {
+	                    content: 'Save options',
+	                    loading: this.props.optionsSaved === "saving",
+	                    icon: this.props.optionsSaved === "saved" ? "checkmark" : undefined,
+	                    onClick: this.handleSaveOptions,
+	                    color: this.props.optionsSaved === "dirty" ? "green" : undefined
+	                })
 	            );
 	        }
 	    }]);
@@ -842,7 +982,10 @@ webpackJsonp([0],{
 	
 	var mapStateToProps = function mapStateToProps(state) {
 	    return {
-	        options: state.userOptions.optionsList
+	        optionsLoading: state.userOptions.optionsLoading,
+	        optionsSaved: state.userOptions.optionsSaved,
+	        options: state.userOptions.optionsList,
+	        optionsHash: (0, _index2.getUserOptions)(state)
 	    };
 	};
 	
@@ -850,19 +993,27 @@ webpackJsonp([0],{
 	    return {
 	        // TODO: remove this?
 	        toggleOption: function toggleOption(name) {
-	            dispatch((0, _index.toggleOption)(name));
+	            dispatch(actions.toggleOption(name));
 	        },
 	
 	        setOption: function setOption(name, value) {
-	            dispatch((0, _index.setOption)(name, value));
+	            dispatch(actions.setOption(name, value));
 	        },
 	
 	        requestOptions: function requestOptions() {
-	            dispatch((0, _index.requestOptions)());
+	            dispatch(actions.requestOptions());
 	        },
 	
 	        receiveOptions: function receiveOptions(options) {
-	            dispatch((0, _index.receiveOptions)(options));
+	            dispatch(actions.receiveOptions(options));
+	        },
+	
+	        saveOptionsRequest: function saveOptionsRequest() {
+	            dispatch(actions.saveOptionsRequest());
+	        },
+	
+	        saveOptionsSuccess: function saveOptionsSuccess() {
+	            dispatch(actions.saveOptionsSuccess());
 	        }
 	    };
 	};
@@ -873,7 +1024,7 @@ webpackJsonp([0],{
 
 /***/ },
 
-/***/ 279:
+/***/ 924:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -890,15 +1041,15 @@ webpackJsonp([0],{
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _Switch = __webpack_require__(280);
+	var _Switch = __webpack_require__(925);
 	
 	var _Switch2 = _interopRequireDefault(_Switch);
 	
-	var _slider = __webpack_require__(281);
+	var _slider = __webpack_require__(926);
 	
 	var _slider2 = _interopRequireDefault(_slider);
 	
-	var _spinner = __webpack_require__(282);
+	var _spinner = __webpack_require__(927);
 	
 	var _spinner2 = _interopRequireDefault(_spinner);
 	
@@ -1007,7 +1158,7 @@ webpackJsonp([0],{
 
 /***/ },
 
-/***/ 280:
+/***/ 925:
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1092,7 +1243,7 @@ webpackJsonp([0],{
 
 /***/ },
 
-/***/ 281:
+/***/ 926:
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1175,7 +1326,7 @@ webpackJsonp([0],{
 
 /***/ },
 
-/***/ 282:
+/***/ 927:
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1190,10 +1341,10 @@ webpackJsonp([0],{
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var Spinner = function Spinner() {
+	var Spinner = function Spinner(props) {
 	    return _react2.default.createElement(
 	        "svg",
-	        { className: "spinner", width: "65px", height: "65px", viewBox: "0 0 66 66", xmlns: "http://www.w3.org/2000/svg" },
+	        { className: "spinner button-icon", width: props.width, height: props.height, viewBox: "0 0 66 66", xmlns: "http://www.w3.org/2000/svg" },
 	        _react2.default.createElement("circle", { className: "path", fill: "none", strokeWidth: "6", strokeLinecap: "round", cx: "33", cy: "33", r: "30" })
 	    );
 	};
@@ -1202,7 +1353,7 @@ webpackJsonp([0],{
 
 /***/ },
 
-/***/ 283:
+/***/ 928:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1210,7 +1361,7 @@ webpackJsonp([0],{
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.saveOptionsSuccess = exports.saveOptionsRequest = exports.receiveOptions = exports.requestOptions = exports.toggleOption = exports.setOption = exports.selectMenu = undefined;
+	exports.simulationFinished = exports.requestSimulation = exports.setProgress = exports.startSimulation = exports.saveOptionsSuccess = exports.saveOptionsRequest = exports.receiveOptions = exports.requestOptions = exports.toggleOption = exports.setOption = exports.selectMenu = undefined;
 	
 	var _actionTypes = __webpack_require__(201);
 	
@@ -1272,19 +1423,411 @@ webpackJsonp([0],{
 	
 	var saveOptionsSuccess = exports.saveOptionsSuccess = function saveOptionsSuccess() {
 	    return {
-	        type: actionType.SAVE_OPTIONS_REQUEST
+	        type: actionType.SAVE_OPTIONS_SUCCESS
 	    };
 	};
 	
-	// export const saveOptions = (options) => (dispatch) =>
-	//         fetch('/api/set_options', {
-	//             credentials: 'include',
-	//             body: options,
-	//         }).then(response => {
-	//             dispatch({
-	//                 type: actionType.SAVE_OPTIONS_SUCCESS
-	//             });
-	//         });
+	var startSimulation = exports.startSimulation = function startSimulation() {
+	    return {
+	        type: actionType.START_SIMULATION
+	    };
+	};
+	
+	var setProgress = exports.setProgress = function setProgress(progress) {
+	    return {
+	        type: actionType.SET_PROGRESS,
+	        progress: progress
+	    };
+	};
+	
+	var requestSimulation = exports.requestSimulation = function requestSimulation() {
+	    return {
+	        type: actionType.REQUEST_SIMULATION
+	    };
+	};
+	
+	var simulationFinished = exports.simulationFinished = function simulationFinished() {
+	    return {
+	        type: actionType.SIMULATION_FINISHED
+	    };
+	};
+
+/***/ },
+
+/***/ 929:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactRedux = __webpack_require__(260);
+	
+	var _semanticUiReact = __webpack_require__(280);
+	
+	var _iterationTable = __webpack_require__(930);
+	
+	var _iterationTable2 = _interopRequireDefault(_iterationTable);
+	
+	var _chart = __webpack_require__(931);
+	
+	var _chart2 = _interopRequireDefault(_chart);
+	
+	var _index = __webpack_require__(928);
+	
+	var actions = _interopRequireWildcard(_index);
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var SimulationPage = function (_React$Component) {
+	    _inherits(SimulationPage, _React$Component);
+	
+	    function SimulationPage() {
+	        _classCallCheck(this, SimulationPage);
+	
+	        var _this = _possibleConstructorReturn(this, (SimulationPage.__proto__ || Object.getPrototypeOf(SimulationPage)).call(this));
+	
+	        _this.handleStartSimulation = _this.handleStartSimulation.bind(_this);
+	        // this.pollForProgress = this.pollForProgress.bind(this);
+	        return _this;
+	    }
+	
+	    _createClass(SimulationPage, [{
+	        key: 'pollForProgress',
+	        value: function pollForProgress() {
+	            var self = this;
+	
+	            var timeoutId = window.setTimeout(function () {
+	                fetch('/api/simulation_status', { credentials: 'include' }).then(function (response) {
+	                    return response.json();
+	                }).then(function (data) {
+	                    if (data.progress !== '100') {
+	                        self.pollForProgress();
+	                    }
+	                    self.props.setProgress(data.percentage);
+	                });
+	            }, 1000);
+	        }
+	    }, {
+	        key: 'componentDidUpdate',
+	        value: function componentDidUpdate(prevProps, prevState) {
+	            if (prevProps.simulationState === 'requested' && this.props.simulationState === 'running') {
+	                this.pollForProgress();
+	            }
+	        }
+	    }, {
+	        key: 'handleStartSimulation',
+	        value: function handleStartSimulation() {
+	            var _props = this.props,
+	                startSimulation = _props.startSimulation,
+	                requestSimulation = _props.requestSimulation;
+	
+	
+	            requestSimulation();
+	
+	            fetch('/api/start_simulation', { credentials: 'include' }).then(function (response) {
+	                if (response.ok) {
+	                    startSimulation();
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'renderBeginButton',
+	        value: function renderBeginButton() {
+	            return _react2.default.createElement(
+	                'div',
+	                { className: 'main' },
+	                _react2.default.createElement(_semanticUiReact.Button, {
+	                    content: 'Begin',
+	                    onClick: this.handleStartSimulation,
+	                    loading: this.props.simulationState === 'requested'
+	                })
+	            );
+	        }
+	    }, {
+	        key: 'renderProgressBar',
+	        value: function renderProgressBar() {
+	            return _react2.default.createElement(
+	                _semanticUiReact.Grid,
+	                { columns: 'equal' },
+	                _react2.default.createElement(_semanticUiReact.Grid.Column, null),
+	                _react2.default.createElement(
+	                    _semanticUiReact.Grid.Column,
+	                    { width: 8 },
+	                    _react2.default.createElement(_semanticUiReact.Progress, { percent: this.props.simulationProgress, autoSuccess: true, progress: true })
+	                ),
+	                _react2.default.createElement(_semanticUiReact.Grid.Column, null)
+	            );
+	        }
+	    }, {
+	        key: 'renderResults',
+	        value: function renderResults() {
+	            return _react2.default.createElement(
+	                _semanticUiReact.Grid,
+	                { columns: 'equal' },
+	                _react2.default.createElement(
+	                    _semanticUiReact.Grid.Row,
+	                    null,
+	                    _react2.default.createElement(
+	                        _semanticUiReact.Grid.Column,
+	                        { width: 16, className: 'main' },
+	                        _react2.default.createElement(_chart2.default, null)
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    _semanticUiReact.Grid.Row,
+	                    null,
+	                    _react2.default.createElement(_semanticUiReact.Grid.Column, null),
+	                    _react2.default.createElement(
+	                        _semanticUiReact.Grid.Column,
+	                        { width: 8 },
+	                        _react2.default.createElement(_iterationTable2.default, null)
+	                    ),
+	                    _react2.default.createElement(_semanticUiReact.Grid.Column, null)
+	                )
+	            );
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	
+	            switch (this.props.simulationState) {
+	                case 'idle':
+	                case 'requested':
+	                    return this.renderBeginButton();
+	                case 'running':
+	                    return this.renderProgressBar();
+	                case 'finished':
+	                    return this.renderResults();
+	            }
+	        }
+	    }]);
+	
+	    return SimulationPage;
+	}(_react2.default.Component);
+	
+	var mapStateToProps = function mapStateToProps(state) {
+	    return {
+	        simulationState: state.simulation.simulationState,
+	        simulationProgress: state.simulation.simulationProgress
+	    };
+	};
+	
+	var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+	    return {
+	        startSimulation: function startSimulation() {
+	            dispatch(actions.startSimulation());
+	        },
+	        setProgress: function setProgress(percentage) {
+	            dispatch(actions.setProgress(percentage));
+	        },
+	        requestSimulation: function requestSimulation() {
+	            dispatch(actions.requestSimulation());
+	        },
+	        simulationFinished: function simulationFinished() {
+	            dispatch(actions.simulationFinished());
+	        }
+	    };
+	};
+	
+	SimulationPage = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(SimulationPage);
+	
+	exports.default = SimulationPage;
+
+/***/ },
+
+/***/ 930:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _react = __webpack_require__(1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _semanticUiReact = __webpack_require__(280);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var IterationTable = function IterationTable() {
+	    return _react2.default.createElement(
+	        _semanticUiReact.Table,
+	        { celled: true, inverted: true, selectable: true },
+	        _react2.default.createElement(
+	            _semanticUiReact.Table.Header,
+	            null,
+	            _react2.default.createElement(
+	                _semanticUiReact.Table.Row,
+	                null,
+	                _react2.default.createElement(
+	                    _semanticUiReact.Table.HeaderCell,
+	                    null,
+	                    'Name'
+	                ),
+	                _react2.default.createElement(
+	                    _semanticUiReact.Table.HeaderCell,
+	                    null,
+	                    'Status'
+	                ),
+	                _react2.default.createElement(
+	                    _semanticUiReact.Table.HeaderCell,
+	                    null,
+	                    'Notes'
+	                )
+	            )
+	        ),
+	        _react2.default.createElement(
+	            _semanticUiReact.Table.Body,
+	            null,
+	            _react2.default.createElement(
+	                _semanticUiReact.Table.Row,
+	                null,
+	                _react2.default.createElement(
+	                    _semanticUiReact.Table.Cell,
+	                    null,
+	                    'John'
+	                ),
+	                _react2.default.createElement(
+	                    _semanticUiReact.Table.Cell,
+	                    null,
+	                    'Approved'
+	                ),
+	                _react2.default.createElement(
+	                    _semanticUiReact.Table.Cell,
+	                    { textAlign: 'right' },
+	                    'None'
+	                )
+	            ),
+	            _react2.default.createElement(
+	                _semanticUiReact.Table.Row,
+	                null,
+	                _react2.default.createElement(
+	                    _semanticUiReact.Table.Cell,
+	                    null,
+	                    'Jamie'
+	                ),
+	                _react2.default.createElement(
+	                    _semanticUiReact.Table.Cell,
+	                    null,
+	                    'Approved'
+	                ),
+	                _react2.default.createElement(
+	                    _semanticUiReact.Table.Cell,
+	                    { textAlign: 'right' },
+	                    'Requires call'
+	                )
+	            ),
+	            _react2.default.createElement(
+	                _semanticUiReact.Table.Row,
+	                null,
+	                _react2.default.createElement(
+	                    _semanticUiReact.Table.Cell,
+	                    null,
+	                    'Jill'
+	                ),
+	                _react2.default.createElement(
+	                    _semanticUiReact.Table.Cell,
+	                    null,
+	                    'Denied'
+	                ),
+	                _react2.default.createElement(
+	                    _semanticUiReact.Table.Cell,
+	                    { textAlign: 'right' },
+	                    'None'
+	                )
+	            )
+	        )
+	    );
+	};
+	
+	exports.default = IterationTable;
+
+/***/ },
+
+/***/ 931:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _zingchartReact = __webpack_require__(932);
+	
+	var _react = __webpack_require__(1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _semanticUiReact = __webpack_require__(280);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Chart = function (_Component) {
+	    _inherits(Chart, _Component);
+	
+	    function Chart() {
+	        _classCallCheck(this, Chart);
+	
+	        return _possibleConstructorReturn(this, (Chart.__proto__ || Object.getPrototypeOf(Chart)).apply(this, arguments));
+	    }
+	
+	    _createClass(Chart, [{
+	        key: 'render',
+	        value: function render() {
+	            var series = [{
+	                values: [35, 42, 67, 89, 25, 34, 67, 85]
+	            }];
+	
+	            var config = {};
+	
+	            return _react2.default.createElement(
+	                'div',
+	                { className: 'chart-container' },
+	                _react2.default.createElement(_zingchartReact.line, { id: 'iterationsChart', height: '300', width: '600', data: config, series: series, theme: 'dark' }),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'iteration-input-container' },
+	                    _react2.default.createElement(_semanticUiReact.Icon, { name: 'chevron left', size: 'big' }),
+	                    _react2.default.createElement(_semanticUiReact.Input, { className: 'iteration-input' }),
+	                    _react2.default.createElement(_semanticUiReact.Icon, { name: 'chevron right', size: 'big' })
+	                )
+	            );
+	        }
+	    }]);
+	
+	    return Chart;
+	}(_react.Component);
+	
+	exports.default = Chart;
 
 /***/ }
 

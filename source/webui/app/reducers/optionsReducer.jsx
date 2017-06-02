@@ -1,9 +1,4 @@
-import {
-    SET_OPTION,
-    TOGGLE_OPTION,
-    REQUEST_OPTIONS,
-    RECEIVE_OPTIONS,
-} from 'actions/actionTypes.jsx';
+import * as actionTypes from '../actions/actionTypes.jsx';
 
 const initialOptions = [
     {
@@ -84,18 +79,18 @@ const initialOptions = [
 
 function userOption(state={}, action) {
     switch (action.type) {
-        case SET_OPTION:
+        case actionTypes.SET_OPTION:
             if (state.name !== action.payload.name) {
-                return state
+                return state;
             }
             return Object.assign({}, state, {value: action.payload.value});
 
-        case TOGGLE_OPTION:
+        case actionTypes.TOGGLE_OPTION:
             if (state.name !== action.payload.name) {
-                return state
+                return state;
             }
             return Object.assign({}, state, {value: !state.value});
-        case RECEIVE_OPTIONS:
+        case actionTypes.RECEIVE_OPTIONS:
             const {options} = action.payload;
 
             if (options.hasOwnProperty(state.id)) {
@@ -114,9 +109,9 @@ function userOption(state={}, action) {
 
 function optionsLoading(state=true, action) {
     switch(action.type) {
-        case REQUEST_OPTIONS:
+        case actionTypes.REQUEST_OPTIONS:
             return true;
-        case RECEIVE_OPTIONS:
+        case actionTypes.RECEIVE_OPTIONS:
             return false;
         default:
             return state;
@@ -125,10 +120,24 @@ function optionsLoading(state=true, action) {
 
 function optionsList(state=initialOptions, action) {
     switch(action.type) {
-        case SET_OPTION:
-        case TOGGLE_OPTION:
-        case RECEIVE_OPTIONS:
+        case actionTypes.SET_OPTION:
+        case actionTypes.TOGGLE_OPTION:
+        case actionTypes.RECEIVE_OPTIONS:
             return state.map(opt => userOption(opt, action));
+        default:
+            return state;
+    }
+}
+
+function optionsSaved(state='saved', action) {
+    switch(action.type) {
+        case actionTypes.SAVE_OPTIONS_REQUEST:
+            return "saving";
+        case actionTypes.SAVE_OPTIONS_SUCCESS:
+            return "saved";
+        case actionTypes.SET_OPTION:
+        case actionTypes.TOGGLE_OPTION:
+            return "dirty";
         default:
             return state;
     }
@@ -137,8 +146,18 @@ function optionsList(state=initialOptions, action) {
 function userOptions(state={}, action) {
     return {
         optionsLoading: optionsLoading(state.optionsLoading, action),
+        optionsSaved: optionsSaved(state.optionsSaved, action),
         optionsList: optionsList(state.optionsList, action),
     }
 }
 
 export default userOptions;
+
+
+export const getByOption = (state) => {
+    const user_options = {};
+
+    state.optionsList.forEach((option) => user_options[option.id] = option.value);
+
+    return user_options;
+};

@@ -1,11 +1,19 @@
 import {connect} from 'react-redux';
-import React, {Component, PropTypes} from 'react';
+import React, {Component} from 'react';
+import { Button } from 'semantic-ui-react';
 
 import OptionsList from 'components/optionsList.jsx';
 import Spinner from 'components/spinner.jsx';
-import {setOption, toggleOption, requestOptions, receiveOptions} from 'actions/index.jsx';
+import * as actions from 'actions/index.jsx';
+import {getUserOptions} from '../reducers/index.jsx';
 
 class OptionsListContainer extends Component {
+    constructor() {
+        super();
+
+        this.handleSaveOptions = this.handleSaveOptions.bind(this);
+    }
+
     componentDidMount() {
         this.fetchData();
     }
@@ -18,11 +26,29 @@ class OptionsListContainer extends Component {
 
         fetch('/api/user_options', {credentials: 'include'})
             .then(function (response) {
-                return response.json()
+                return response.json();
             })
             .then(function (options) {
                 receiveOptions(options);
             });
+    }
+
+    handleSaveOptions() {
+        console.log('Saving options...');
+
+        const {saveOptionsRequest, saveOptionsSuccess} = this.props;
+
+        saveOptionsRequest();
+
+        fetch('/api/user_options', {
+            method: 'POST',
+            credentials: 'include',
+            body: JSON.stringify(this.props.optionsHash),
+        }).then(function (response) {
+            if (response.ok) {
+                saveOptionsSuccess();
+            }
+        });
     }
 
     render() {
@@ -32,15 +58,27 @@ class OptionsListContainer extends Component {
         }
 
         return (
-            <div>
+            <div className="options-container">
                 <OptionsList
                     options={this.props.options}
                     setOption={this.props.setOption}
                 />
 
-                <div className="button" onClick={this.handleSaveOptions}>
-                    Create
-                </div>
+                {/*<div className="button" onClick={this.handleSaveOptions}>*/}
+                    {/*{ this.props.optionsSaved === 'saving'*/}
+                        {/*? <Spinner width="15px" height="15px"/>*/}
+                        {/*: null*/}
+                    {/*}*/}
+                    {/*Save options*/}
+                {/*</div>*/}
+
+                <Button
+                    content="Save options"
+                    loading={this.props.optionsSaved === "saving"}
+                    icon={this.props.optionsSaved === "saved" ? "checkmark" : undefined}
+                    onClick={this.handleSaveOptions}
+                    color={this.props.optionsSaved === "dirty" ? "green" : undefined}
+                />
             </div>
         )
     }
@@ -48,7 +86,10 @@ class OptionsListContainer extends Component {
 
 const mapStateToProps = (state) => {
     return {
+        optionsLoading: state.userOptions.optionsLoading,
+        optionsSaved: state.userOptions.optionsSaved,
         options: state.userOptions.optionsList,
+        optionsHash: getUserOptions(state),
     };
 };
 
@@ -56,19 +97,27 @@ const mapDispatchToProps = (dispatch) => {
     return {
         // TODO: remove this?
         toggleOption: (name) => {
-            dispatch(toggleOption(name));
+            dispatch(actions.toggleOption(name));
         },
 
         setOption: (name, value) => {
-            dispatch(setOption(name, value));
+            dispatch(actions.setOption(name, value));
         },
 
         requestOptions: () => {
-            dispatch(requestOptions());
+            dispatch(actions.requestOptions());
         },
 
         receiveOptions: (options) => {
-            dispatch(receiveOptions(options));
+            dispatch(actions.receiveOptions(options));
+        },
+
+        saveOptionsRequest: () => {
+            dispatch(actions.saveOptionsRequest());
+        },
+
+        saveOptionsSuccess: () => {
+            dispatch(actions.saveOptionsSuccess());
         }
     }
 };

@@ -1,17 +1,23 @@
 // import { combineReducers } from 'redux';
 import menuItems from './menu.jsx';
-import userOptions from './optionsReducer.jsx';
+import userOptions, {getByOption} from './optionsReducer.jsx';
+import simulation from './simulationReducer.jsx';
+
 
 function rootReducer(state = {}, action) {
     // this is the shape of the state object
     return {
         menuItems: menuItems(state.menuItems, action),
         userOptions: userOptions(state.userOptions, action),
+        simulation: simulation(state.simulation, action),
     };
 }
 
 export default rootReducer;
 
+export const getUserOptions = (state) => {
+    return getByOption(state.userOptions)
+};
 
 /*
     * The reducer is a function that returns the new store state tree.

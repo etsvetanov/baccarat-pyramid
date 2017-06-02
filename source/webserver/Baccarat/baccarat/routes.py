@@ -13,3 +13,6 @@ def includeme(config):
     config.add_route('user_options', '/api/user_options')
     config.add_route('create_user', '/api/create_user')
 
+    config.add_route('start_simulation', '/api/start_simulation')
+    config.add_route('simulation_status', '/api/simulation_status')
+

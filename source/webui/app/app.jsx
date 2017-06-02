@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import BasePage from 'pages/base.jsx';
 import AdminPage from 'pages/admin.jsx';
 import OptionsPage from 'pages/optionsPage.jsx';
-// import SimulatePage from 'pages/simulatePage.jsx';
+import SimulationPage from 'pages/simulationPage.jsx';
 
 /*
     The 'Provider' component makes the Redux available to the connect() calls in the component
@@ -18,7 +18,7 @@ const App = ({ store }) => (
             <Route path="/" component={BasePage}>
                 <Route path="admin" component={AdminPage}/>
                 <Route path="options" component={OptionsPage}/>
-                {/*<Route path="simulate" component={SimulatePage}/>*/}
+                <Route path="simulate" component={SimulationPage}/>
             </Route>
             {/*<Route path="/login" component={Login} />*/}
         </Router>
