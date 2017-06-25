@@ -33,4 +33,6 @@ function simulation(state = {}, action) {
     }
 }
 
-export default simulation;
+export {simulationState};
+
+export default simulation
