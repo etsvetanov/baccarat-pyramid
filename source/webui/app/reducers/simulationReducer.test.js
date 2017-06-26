@@ -9,3 +9,4 @@ test('simulationState with action.type START_SIMULATION', () => {
 
    expect(simulationState('idle', testAction)).toBe('running');
 });
+
