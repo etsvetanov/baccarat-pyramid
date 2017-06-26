@@ -66,7 +66,7 @@ export const startSimulation = () => {
 
 export const setProgress = (progress) => {
     return {
-        type: actionType.SET_PROGRESS,
+        type: actionType.UPDATE_PROGRESS,
         progress,
     }
 };

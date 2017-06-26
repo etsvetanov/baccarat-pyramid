@@ -1,3 +1,5 @@
+import {combineReducers} from 'redux';
+
 import * as actionTypes from '../actions/actionTypes.jsx';
 
 function simulationState(state = 'idle', action) {
@@ -6,7 +8,7 @@ function simulationState(state = 'idle', action) {
             return "running";
         case actionTypes.REQUEST_SIMULATION:
             return "requested";
-        case actionTypes.SET_PROGRESS:
+        case actionTypes.UPDATE_PROGRESS:
             if (action.progress === '100') {
                 return "finished";
             } else {
@@ -19,20 +21,19 @@ function simulationState(state = 'idle', action) {
 
 function simulationProgress(state = '0', action) {
     switch (action.type) {
-        case actionTypes.SET_PROGRESS:
+        case actionTypes.UPDATE_PROGRESS:
             return action.progress;
         default:
             return state;
     }
 }
 
-function simulation(state = {}, action) {
-    return {
-        simulationState: simulationState(state.simulationState, action),
-        simulationProgress: simulationProgress(state.simulationProgress, action),
-    }
-}
+const simulation = combineReducers({
+    simulationState,
+    simulationProgress,
+});
 
-export {simulationState};
+
+export {simulationState, simulationProgress};
 
 export default simulation
