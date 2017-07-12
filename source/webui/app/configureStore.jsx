@@ -1,4 +1,5 @@
-import { createStore, compose } from 'redux'
+import { createStore, compose, applyMiddleware } from 'redux'
+import thunk from 'redux-thunk';
 import { rootReducer } from './reducers'
 
 /*
@@ -10,6 +11,7 @@ import { rootReducer } from './reducers'
 
 function configureStore() {
     const enhancers = compose(
+        applyMiddleware(thunk),
         window.devToolsExtension ? window.devToolsExtension() : f => f
     );
 

@@ -7,6 +7,7 @@ import Spinner from 'components/spinner.jsx';
 import * as actions from 'actions/index.jsx';
 import {getOptionsHash, getOptionsList} from '../reducers/index.jsx';
 
+
 class OptionsListContainer extends Component {
     constructor() {
         super();
@@ -19,18 +20,7 @@ class OptionsListContainer extends Component {
     }
 
     fetchData() {
-        console.log('will fetch data...');
-        const {requestOptions, receiveOptions} = this.props;
-
-        requestOptions();
-
-        fetch('/api/user_options', {credentials: 'include'})
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (options) {
-                receiveOptions(options);
-            });
+        this.props.fetchOptions();
     }
 
     handleSaveOptions() {
@@ -96,13 +86,7 @@ const mapDispatchToProps = (dispatch) => {
             dispatch(actions.setOption(name, value));
         },
 
-        requestOptions: () => {
-            dispatch(actions.requestOptions());
-        },
-
-        receiveOptions: (options) => {
-            dispatch(actions.receiveOptions(options));
-        },
+        fetchOptions: actions.fetchOptions,
 
         saveOptionsRequest: () => {
             dispatch(actions.saveOptionsRequest());

@@ -5,9 +5,6 @@ import rootReducer from './reducers/index.jsx';
 import App from 'app.jsx';
 
 
-// TODO: REMOVE THIS
-window.r = React;
-
 const enhancers = compose(
     window.devToolsExtension ? window.devToolsExtension() : f => f
 );

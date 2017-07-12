@@ -29,12 +29,24 @@ export const toggleOption = (name) => {
     }
 };
 
+export const fetchOptions = () => (dispatch) => {
+    dispatch(requestOptions());
+    return fetch('/api/user_options', {credentials: 'include'})
+        .then(response => response.json)
+        .then(options => {
+            dispatch(receiveOptions(options));
+        });
+};
+
+
+// TODO: maybe move this inside fetchOptions
 export const requestOptions = () => {
     return {
         type: actionType.REQUEST_OPTIONS,
     }
 };
 
+// TODO: maybe move this inside fetchOptions
 export const receiveOptions = (options) => {
     return {
         type: actionType.RECEIVE_OPTIONS,
