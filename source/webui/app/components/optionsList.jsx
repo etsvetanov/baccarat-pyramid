@@ -1,13 +1,14 @@
 import React, {PropTypes} from 'react';
-import Switch from './Switch.jsx';
 import Slider from './slider.jsx';
 import Spinner from './spinner.jsx';
+import { Checkbox } from 'semantic-ui-react';
 
 
 class OptionsList extends React.Component {
     constructor(props) {
         super(props);
         this._handleChange = this._handleChange.bind(this);
+        this._handleCheckboxChange = this._handleCheckboxChange.bind(this);
         this._renderItem = this._renderItem.bind(this);
     }
 
@@ -33,17 +34,23 @@ class OptionsList extends React.Component {
         this.props.setOption(name, value)
     }
 
+    _handleCheckboxChange(event, data) {
+        const value = data.checked;
+        const name = data.name;
+        this.props.setOption(name, value);
+    }
+
     _renderItem(option) {
         let optionControl;
 
         switch (typeof option.value) {
             case 'boolean':
                 optionControl = (
-                    <Switch
+                    <Checkbox
+                        toggle={true}
                         name={option.id}
                         checked={option.value}
-                        id={option.id}
-                        handleChange={this._handleChange}
+                        onChange={this._handleCheckboxChange}
                     />
                 );
                 break;
