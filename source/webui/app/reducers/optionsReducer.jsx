@@ -1,113 +1,126 @@
 import * as actionTypes from '../actions/actionTypes.jsx';
+import {combineReducers} from 'redux';
 
-const initialOptions = [
-    {
-        name: "Starting bet",
+
+const initialOptions = () => ({
+    "starting_bet": {
+        label: "Starting bet",
         id: "starting_bet",
         value: 1,
         min: "0.1",
         max: "100",
         step: "0.1"
     },
-    {
-        name: "Step",
+    "step": {
+        label: "Step",
         id: "step",
         value: 1,
         min: "1",
         max: "5",
         step: "1",
     },
-    {
-        name: "Pairs",
+    "pairs": {
+        label: "Pairs",
         id: "pairs",
         value: 10,
         min: "1",
         max: "100",
         step: "1",
     },
-    {
-        name: "Bet column",
+    "bet_column": {
+        label: "Bet column",
         id: "bet_column",
         value: true
     },
-    {
-        name: "Index column",
+    "index_column": {
+        label: "Index column",
         id: "index_column",
         value: true
     },
-    {
-        name: "Level column",
+    "level_column": {
+        label: "Level column",
         id: "level_column",
         value: true
     },
-    {
-        name: "Net column",
+    "net_column": {
+        label: "Net column",
         id: "net_column",
         value: true
     },
-    {
-        name: "Partner column",
+    "partner_column": {
+        label: "Partner column",
         id: "partner_column",
         value: true
     },
-    {
-        name: "Choice column",
+    "choice_column": {
+        label: "Choice column",
         id: "choice_column",
         value: true
     },
-    {
-        name: "Result column",
+    "result_column": {
+        label: "Result column",
         id: "result_column",
         value: true
     },
-    {
-        name: "Debt column",
+    "debt_column": {
+        label: "Debt column",
         id: "debt_column",
         value: true
     },
-    {
-        name: "Real player rows",
+    "real_player_rows": {
+        label: "Real player rows",
         id: "real_player_rows",
         value: true
     },
-    {
-        name: "Virtual player rows",
+    "virtual_player_rows": {
+        label: "Virtual player rows",
         id: "virtual_player_rows",
         value: true
-    }
-];
+    },
+});
 
-function userOption(state={}, action) {
-    switch (action.type) {
+const option = (state={}, action) => {
+    switch(action.type) {
         case actionTypes.SET_OPTION:
-            if (state.name !== action.payload.name) {
-                return state;
-            }
-            return Object.assign({}, state, {value: action.payload.value});
-
-        case actionTypes.TOGGLE_OPTION:
-            if (state.name !== action.payload.name) {
-                return state;
-            }
-            return Object.assign({}, state, {value: !state.value});
+            return {
+                ...state,
+                value: action.value,
+            };
         case actionTypes.RECEIVE_OPTIONS:
-            const {options} = action.payload;
+            return {
+                ...state,
+                value: action.options[state.id],
+            };
+        default:
+            return state;
+    }
+};
 
-            if (options.hasOwnProperty(state.id)) {
-                return {
-                    ...state,
-                    value: options[state.id],
-                };
+
+const options = (state=initialOptions(), action) => {
+    switch(action.type) {
+        case actionTypes.SET_OPTION:
+            return {
+                ...state,
+                [action.name]: option(state[action.name], action),
+            };
+        case actionTypes.RECEIVE_OPTIONS:
+            const newState = {...state};
+
+            for (const optionId in state) {
+                if (state.hasOwnProperty(optionId) && action.options.hasOwnProperty(optionId)) {
+                    newState[optionId] = option(state[optionId], action);
+                }
             }
 
-            return state;
+            return newState;
 
         default:
             return state;
     }
-}
+};
 
-function optionsLoading(state=true, action) {
+const optionsLoading = (state=true, action) => {
     switch(action.type) {
         case actionTypes.REQUEST_OPTIONS:
             return true;
@@ -116,21 +129,10 @@ function optionsLoading(state=true, action) {
         default:
             return state;
     }
-}
+};
 
-function optionsList(state=initialOptions, action) {
-    switch(action.type) {
-        case actionTypes.SET_OPTION:
-        case actionTypes.TOGGLE_OPTION:
-        case actionTypes.RECEIVE_OPTIONS:
-            return state.map(opt => userOption(opt, action));
-        default:
-            return state;
-    }
-}
-
-function optionsSaved(state='saved', action) {
-    switch(action.type) {
+const optionsSaved = (state='saved', action) => {
+    switch (action.type) {
         case actionTypes.SAVE_OPTIONS_REQUEST:
             return "saving";
         case actionTypes.SAVE_OPTIONS_SUCCESS:
@@ -141,23 +143,40 @@ function optionsSaved(state='saved', action) {
         default:
             return state;
     }
-}
-
-function userOptions(state={}, action) {
-    return {
-        optionsLoading: optionsLoading(state.optionsLoading, action),
-        optionsSaved: optionsSaved(state.optionsSaved, action),
-        optionsList: optionsList(state.optionsList, action),
-    }
-}
-
-export default userOptions;
-
-
-export const getByOption = (state) => {
-    const user_options = {};
-
-    state.optionsList.forEach((option) => user_options[option.id] = option.value);
-
-    return user_options;
 };
+
+export const userOptions = combineReducers({
+    optionsLoading,
+    optionsSaved,
+    options,
+});
+
+
+
+export const getOptionsHash = (state) => {
+    const optionsHash = {};
+
+    for (const key in state.options) {
+        optionsHash[key] = state.options[key].value;
+    }
+
+    return optionsHash;
+};
+
+export const getOptionsList = (state) => {
+    const optionsList = [];
+
+    for (const key in state.options) {
+        optionsList.push(state.options[key]);
+    }
+
+    return optionsList;
+};
+
+export {optionsLoading};
+export {optionsSaved};
+export {initialOptions};
+export {options};
+export {option};
+
+export default userOptions

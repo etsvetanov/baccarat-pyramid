@@ -15,10 +15,8 @@ export const selectMenu = (menuText) => {
 export const setOption = (name, value) => {
     return {
         type: actionType.SET_OPTION,
-        payload: {
-            name,
-            value,
-        }
+        name,
+        value,
     }
 };
 
@@ -40,9 +38,7 @@ export const requestOptions = () => {
 export const receiveOptions = (options) => {
     return {
         type: actionType.RECEIVE_OPTIONS,
-        payload: {
-            options,
-        }
+        options,
     }
 };
 

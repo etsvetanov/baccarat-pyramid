@@ -1,6 +1,6 @@
 // import { combineReducers } from 'redux';
 import menuItems from './menu.jsx';
-import userOptions, {getByOption} from './optionsReducer.jsx';
+import userOptions, * as fromOptionsReducer from './optionsReducer.jsx';
 import simulation from './simulationReducer.jsx';
 
 
@@ -15,8 +15,12 @@ function rootReducer(state = {}, action) {
 
 export default rootReducer;
 
-export const getUserOptions = (state) => {
-    return getByOption(state.userOptions)
+export const getOptionsHash = (state) => {
+    return fromOptionsReducer.getOptionsHash(state.userOptions);
+};
+
+export const getOptionsList = (state) => {
+    return fromOptionsReducer.getOptionsList(state.userOptions);
 };
 
 /*

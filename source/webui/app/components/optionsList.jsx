@@ -3,6 +3,7 @@ import Switch from './Switch.jsx';
 import Slider from './slider.jsx';
 import Spinner from './spinner.jsx';
 
+
 class OptionsList extends React.Component {
     constructor(props) {
         super(props);
@@ -39,7 +40,7 @@ class OptionsList extends React.Component {
             case 'boolean':
                 optionControl = (
                     <Switch
-                        name={option.name}
+                        name={option.id}
                         checked={option.value}
                         id={option.id}
                         handleChange={this._handleChange}
@@ -50,7 +51,7 @@ class OptionsList extends React.Component {
                 optionControl = (
                     <Slider
                         value={option.value}
-                        name={option.name}
+                        name={option.id}
                         handleChange={this._handleChange}
                         min={option.min}
                         max={option.max}
@@ -59,15 +60,19 @@ class OptionsList extends React.Component {
                 );
         }
 
+        // console.log('OptionsList._renderItem', option.label);
+
         return (
-            <li key={option.name} className="option-container">
-                <span className="inline-label"> {option.name} </span>
+            <li key={option.label} className="option-container">
+                <span className="inline-label"> {option.label} </span>
                 {optionControl}
             </li>
         );
     }
 
     render() {
+        console.log('OptionsList.render()', this.props.options);
+
         return (
             <ul>
                 {this.props.options.map(this._renderItem)}

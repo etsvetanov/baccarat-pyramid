@@ -5,7 +5,7 @@ import { Button } from 'semantic-ui-react';
 import OptionsList from 'components/optionsList.jsx';
 import Spinner from 'components/spinner.jsx';
 import * as actions from 'actions/index.jsx';
-import {getUserOptions} from '../reducers/index.jsx';
+import {getOptionsHash, getOptionsList} from '../reducers/index.jsx';
 
 class OptionsListContainer extends Component {
     constructor() {
@@ -64,14 +64,6 @@ class OptionsListContainer extends Component {
                     setOption={this.props.setOption}
                 />
 
-                {/*<div className="button" onClick={this.handleSaveOptions}>*/}
-                    {/*{ this.props.optionsSaved === 'saving'*/}
-                        {/*? <Spinner width="15px" height="15px"/>*/}
-                        {/*: null*/}
-                    {/*}*/}
-                    {/*Save options*/}
-                {/*</div>*/}
-
                 <Button
                     content="Save options"
                     loading={this.props.optionsSaved === "saving"}
@@ -88,8 +80,8 @@ const mapStateToProps = (state) => {
     return {
         optionsLoading: state.userOptions.optionsLoading,
         optionsSaved: state.userOptions.optionsSaved,
-        options: state.userOptions.optionsList,
-        optionsHash: getUserOptions(state),
+        options: getOptionsList(state),
+        optionsHash: getOptionsHash(state),
     };
 };
 
