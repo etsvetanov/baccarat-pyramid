@@ -11,6 +11,7 @@
     "react-redux": "^5.0.1",
     "react-router": "^3.0.1",
     "redux": "^3.6.0",
+    "redux-thunk": "^2.2.0",
     "semantic-ui-react": "^0.67.2",
     "whatwg-fetch": "^2.0.2",
     "zingchart": "^2.6.0",
@@ -42,6 +43,7 @@
   "scripts": {
     "webpack": "webpack",
     "test": "jest --no-cache",
-    "test:cov": "jest --no-cache --coverage"
+    "test:cov": "jest --no-cache --coverage",
+    "build": "webpack --watch --progress --color"
   }
 }
